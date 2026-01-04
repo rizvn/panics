@@ -2,7 +2,7 @@ package panics
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"runtime"
 	"runtime/debug"
@@ -66,9 +66,9 @@ func WithTrace(message string) {
 func Recover() {
 	if r := recover(); r != nil {
 		if err, ok := r.(error); ok {
-			log.Print(fmt.Errorf("recovered from panic: %w", err))
+			slog.Error("Recovered from panic: %w", err)
 		} else {
-			log.Printf("recovered from panic: %v\n", r)
+			slog.Error("recovered from panic: %v\n", r)
 		}
 	}
 }
@@ -114,7 +114,7 @@ func Retry(maxRetries int, fn func()) {
 			return
 		}
 
-		log.Printf("Retrying function due to error: %v", err)
+		slog.Error("Retrying function due to error: %v", err)
 		retries--
 	}
 }
@@ -151,11 +151,11 @@ func RecoveryMiddleware(next http.Handler) http.Handler {
 		defer func() {
 			if rec := recover(); rec != nil {
 				if err, ok := rec.(error); ok {
-					log.Print(fmt.Errorf("recovered from panic: %w", err))
+					slog.Error("recovered from panic: %w", err)
 				} else {
-					log.Printf("recovered from panic: %v\n", r)
+					slog.Error("recovered from panic: %v", r)
 				}
-				log.Printf("Stacktrace: %s\n", debug.Stack())
+				slog.Error("Stacktrace: %s\n", debug.Stack())
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			}
 		}()
