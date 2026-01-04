@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"runtime"
 	"runtime/debug"
 	"strings"
 )
@@ -15,7 +16,8 @@ func OnError(err error, message ...string) {
 		if len(message) > 0 {
 			msg = message[0] + " - "
 		}
-		panic(fmt.Errorf("error: %s%w\nStacktrace: %s\n---", msg, err, debug.Stack()))
+		file, line := printCallerLine()
+		panic(fmt.Sprintf("(%s:%d): %s %v.", file, line, msg, err))
 	}
 }
 
@@ -26,7 +28,8 @@ func OnNil(value any, message ...string) {
 		if len(message) > 0 {
 			msg = message[0] + " - "
 		}
-		panic(fmt.Errorf("error: nil value - %s\nStacktrace: %s\n---", msg, debug.Stack()))
+		file, line := printCallerLine()
+		panic(fmt.Sprintf("(%s:%d): %s %v.", file, line, msg, "nil value"))
 	}
 }
 
@@ -37,7 +40,8 @@ func OnFalse(condition bool, message ...string) {
 		if len(message) > 0 {
 			msg = message[0] + " - "
 		}
-		panic(fmt.Errorf("error: condition is true - %s\nStacktrace: %s\n---", msg, debug.Stack()))
+		file, line := printCallerLine()
+		panic(fmt.Sprintf("(%s:%d): %s %v.", file, line, msg, ""))
 	}
 }
 
@@ -48,7 +52,8 @@ func OnBlank(value string, message ...string) {
 		if len(message) > 0 {
 			msg = message[0] + " - "
 		}
-		panic(fmt.Errorf("error: blank string - %s\nStacktrace: %s\n---", msg, debug.Stack()))
+		file, line := printCallerLine()
+		panic(fmt.Sprintf("(%s:%d): %s %v.", file, line, msg, "blank string"))
 	}
 }
 
@@ -156,4 +161,9 @@ func RecoveryMiddleware(next http.Handler) http.Handler {
 		}()
 		next.ServeHTTP(w, r)
 	})
+}
+
+func printCallerLine() (string, int) {
+	_, file, line, _ := runtime.Caller(1)
+	return file, line
 }
