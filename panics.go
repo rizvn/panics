@@ -10,50 +10,34 @@ import (
 )
 
 // OnError panics if err is not nil, including an optional message and stack trace.
-func OnError(err error, message ...string) {
+func OnError(err error, message string) {
 	if err != nil {
-		msg := ""
-		if len(message) > 0 {
-			msg = message[0] + " - "
-		}
 		_, file, line, _ := runtime.Caller(1)
-		panic(fmt.Sprintf("(%s:%d): %s %v.", file, line, msg, err))
+		panic(fmt.Sprintf("(%s:%d): %s %v", file, line, message, err))
 	}
 }
 
 // OnNil panics if value is nil, including an optional message and stack trace.
-func OnNil(value any, message ...string) {
+func OnNil(value any, message string) {
 	if value == nil {
-		msg := ""
-		if len(message) > 0 {
-			msg = message[0] + " - "
-		}
 		_, file, line, _ := runtime.Caller(1)
-		panic(fmt.Sprintf("(%s:%d): %s %v.", file, line, msg, "nil value"))
+		panic(fmt.Sprintf("(%s:%d): %s %v", file, line, message, "nil value"))
 	}
 }
 
 // OnFalse panics if condition is false, including an optional message and stack trace.
-func OnFalse(condition bool, message ...string) {
+func OnFalse(condition bool, message string) {
 	if !condition {
-		msg := ""
-		if len(message) > 0 {
-			msg = message[0] + " - "
-		}
 		_, file, line, _ := runtime.Caller(1)
-		panic(fmt.Sprintf("(%s:%d): %s %v.", file, line, msg, ""))
+		panic(fmt.Sprintf("(%s:%d): %s %v", file, line, message, ""))
 	}
 }
 
 // OnBlank panics if the string value is blank (empty or whitespace), including an optional message and stack trace.
-func OnBlank(value string, message ...string) {
+func OnBlank(value string, message string) {
 	if strings.TrimSpace(value) == "" {
-		msg := ""
-		if len(message) > 0 {
-			msg = message[0] + " - "
-		}
 		_, file, line, _ := runtime.Caller(1)
-		panic(fmt.Sprintf("(%s:%d): %s %v.", file, line, msg, "blank string"))
+		panic(fmt.Sprintf("(%s:%d): %s %v.", file, line, message, "blank string"))
 	}
 }
 
@@ -68,7 +52,7 @@ func Recover() {
 		if err, ok := r.(error); ok {
 			slog.Error("Recovered from panic: %w", err)
 		} else {
-			slog.Error("recovered from panic: %v\n", r)
+			slog.Error("recovered from panic: %v", r)
 		}
 	}
 }
