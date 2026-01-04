@@ -16,7 +16,7 @@ func OnError(err error, message ...string) {
 		if len(message) > 0 {
 			msg = message[0] + " - "
 		}
-		file, line := printCallerLine()
+		_, file, line, _ := runtime.Caller(1)
 		panic(fmt.Sprintf("(%s:%d): %s %v.", file, line, msg, err))
 	}
 }
@@ -28,7 +28,7 @@ func OnNil(value any, message ...string) {
 		if len(message) > 0 {
 			msg = message[0] + " - "
 		}
-		file, line := printCallerLine()
+		_, file, line, _ := runtime.Caller(1)
 		panic(fmt.Sprintf("(%s:%d): %s %v.", file, line, msg, "nil value"))
 	}
 }
@@ -40,7 +40,7 @@ func OnFalse(condition bool, message ...string) {
 		if len(message) > 0 {
 			msg = message[0] + " - "
 		}
-		file, line := printCallerLine()
+		_, file, line, _ := runtime.Caller(1)
 		panic(fmt.Sprintf("(%s:%d): %s %v.", file, line, msg, ""))
 	}
 }
@@ -52,7 +52,7 @@ func OnBlank(value string, message ...string) {
 		if len(message) > 0 {
 			msg = message[0] + " - "
 		}
-		file, line := printCallerLine()
+		_, file, line, _ := runtime.Caller(1)
 		panic(fmt.Sprintf("(%s:%d): %s %v.", file, line, msg, "blank string"))
 	}
 }
@@ -161,9 +161,4 @@ func RecoveryMiddleware(next http.Handler) http.Handler {
 		}()
 		next.ServeHTTP(w, r)
 	})
-}
-
-func printCallerLine() (string, int) {
-	_, file, line, _ := runtime.Caller(1)
-	return file, line
 }
