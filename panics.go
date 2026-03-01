@@ -9,11 +9,13 @@ import (
 	"strings"
 )
 
+const errorFormat = "\nFile: %s \nLine: %d \nMessage: %s \nError: %v\n"
+
 // OnError panics if err is not nil, including an optional message and stack trace.
 func OnError(err error, message string) {
 	if err != nil {
 		_, file, line, _ := runtime.Caller(1)
-		panic(fmt.Sprintf("(%s:%d): %s %v", file, line, message, err))
+		panic(fmt.Sprintf(errorFormat, file, line, message, err))
 	}
 }
 
@@ -21,7 +23,7 @@ func OnError(err error, message string) {
 func OnNil(value any, message string) {
 	if value == nil {
 		_, file, line, _ := runtime.Caller(1)
-		panic(fmt.Sprintf("(%s:%d): %s %v", file, line, message, "nil value"))
+		panic(fmt.Sprintf(errorFormat, file, line, message, "nil value"))
 	}
 }
 
@@ -29,7 +31,7 @@ func OnNil(value any, message string) {
 func OnFalse(condition bool, message string) {
 	if !condition {
 		_, file, line, _ := runtime.Caller(1)
-		panic(fmt.Sprintf("(%s:%d): %s %v", file, line, message, ""))
+		panic(fmt.Sprintf(errorFormat, file, line, message, ""))
 	}
 }
 
@@ -37,7 +39,7 @@ func OnFalse(condition bool, message string) {
 func OnBlank(value string, message string) {
 	if strings.TrimSpace(value) == "" {
 		_, file, line, _ := runtime.Caller(1)
-		panic(fmt.Sprintf("(%s:%d): %s %v.", file, line, message, "blank string"))
+		panic(fmt.Sprintf(errorFormat, file, line, message, "blank string"))
 	}
 }
 
@@ -50,9 +52,9 @@ func WithTrace(message string) {
 func Recover() {
 	if r := recover(); r != nil {
 		if err, ok := r.(error); ok {
-			slog.Error("Recovered from panic: %w", err)
+			slog.Error("Recovered from panic: %v", err)
 		} else {
-			slog.Error("recovered from panic: %v", r)
+			slog.Error("Recovered from panic: %v", r)
 		}
 	}
 }
@@ -135,11 +137,10 @@ func RecoveryMiddleware(next http.Handler) http.Handler {
 		defer func() {
 			if rec := recover(); rec != nil {
 				if err, ok := rec.(error); ok {
-					slog.Error("recovered from panic: %w", err)
+					slog.Error("recovered from panic: %v", err)
 				} else {
 					slog.Error("recovered from panic: %v", r)
 				}
-				slog.Error("Stacktrace: %s\n", debug.Stack())
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			}
 		}()
