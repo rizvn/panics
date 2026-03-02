@@ -52,9 +52,9 @@ func WithTrace(message string) {
 func Recover() {
 	if r := recover(); r != nil {
 		if err, ok := r.(error); ok {
-			slog.Error("Recovered from panic: %v", err)
+			slog.Error("Recovered from panic", "error", err)
 		} else {
-			slog.Error("Recovered from panic: %v", r)
+			slog.Error("Recovered from panic", "error", r)
 		}
 	}
 }
@@ -100,7 +100,7 @@ func Retry(maxRetries int, fn func()) {
 			return
 		}
 
-		slog.Error("Retrying function due to error: %v", err)
+		slog.Error("Retrying function due to error", "error", err)
 		retries--
 	}
 }
@@ -137,9 +137,9 @@ func RecoveryMiddleware(next http.Handler) http.Handler {
 		defer func() {
 			if rec := recover(); rec != nil {
 				if err, ok := rec.(error); ok {
-					slog.Error("recovered from panic: %v", err)
+					slog.Error("recovered from panic", "error", err)
 				} else {
-					slog.Error("recovered from panic: %v", r)
+					slog.Error("recovered from panic", "error", r)
 				}
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			}
