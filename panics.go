@@ -59,6 +59,15 @@ func Recover() {
 	}
 }
 
+// AddErrorInfo wraps the provided error with file and line information from the caller.
+func AddErrorInfo(err error) error {
+	_, file, line, ok := runtime.Caller(1)
+	if !ok {
+		return err
+	}
+	return fmt.Errorf("[%s:%d] %w", file, line, err)
+}
+
 // RecoverAndHandle recovers from a panic and passes the error to the provided handler function.
 //
 // Example usage:
